@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Book Catalog</title>
+  <title>imagenes chistosas</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -21,6 +21,9 @@
       align-items: center;
       justify-content: space-between;
       border-bottom: 2px solid #4a90d9;
+      position: sticky;
+      top: 0;
+      z-index: 50;
     }
 
     header h1 {
@@ -30,7 +33,7 @@
       text-transform: uppercase;
     }
 
-    #auth-buttons { display: flex; gap: 10px; }
+    #auth-buttons { display: flex; gap: 10px; align-items: center; }
 
     button {
       background: #4a90d9;
@@ -44,15 +47,8 @@
     }
 
     button:hover { background: #357abd; }
-
-    button.secondary {
-      background: transparent;
-      border: 1px solid #4a90d9;
-      color: #4a90d9;
-    }
-
+    button.secondary { background: transparent; border: 1px solid #4a90d9; color: #4a90d9; }
     button.secondary:hover { background: #4a90d920; }
-
     button.danger { background: #c0392b; }
     button.danger:hover { background: #a93226; }
 
@@ -87,11 +83,13 @@
       padding: 32px;
       width: 100%;
       max-width: 420px;
+      max-height: 90vh;
+      overflow-y: auto;
     }
 
     .modal h2 { color: #4a90d9; margin-bottom: 20px; }
 
-    .modal input {
+    .modal input, .modal textarea {
       width: 100%;
       padding: 10px 14px;
       margin-bottom: 14px;
@@ -100,91 +98,112 @@
       border-radius: 6px;
       color: #e0e0e0;
       font-size: 0.95rem;
+      font-family: 'Segoe UI', sans-serif;
     }
 
-    .modal input:focus { outline: none; border-color: #4a90d9; }
+    .modal input:focus, .modal textarea:focus { outline: none; border-color: #4a90d9; }
+
+    .modal textarea { resize: vertical; min-height: 80px; }
+
+    .file-input-label {
+      display: block;
+      padding: 10px 14px;
+      background: #0f0f0f;
+      border: 1px dashed #4a90d9;
+      border-radius: 6px;
+      color: #888;
+      cursor: pointer;
+      margin-bottom: 14px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+
+    .file-input-label:hover { border-color: #357abd; color: #4a90d9; }
+    .file-input-label input { display: none; }
 
     .modal-buttons { display: flex; gap: 10px; margin-top: 8px; }
-
     .error-msg { color: #e74c3c; font-size: 0.85rem; margin-bottom: 10px; }
     .success-msg { color: #2ecc71; font-size: 0.85rem; margin-bottom: 10px; }
 
-    .books-grid {
+    .posts-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 20px;
     }
 
-    .book-card {
+    .post-card {
       background: #1a1a2e;
       border: 1px solid #2a2a4a;
       border-radius: 10px;
-      padding: 20px;
+      overflow: hidden;
       transition: border-color 0.2s, transform 0.2s;
     }
 
-    .book-card:hover { border-color: #4a90d9; transform: translateY(-3px); }
+    .post-card:hover { border-color: #4a90d9; transform: translateY(-3px); }
 
-    .book-card h3 { color: #ffffff; margin-bottom: 6px; font-size: 1rem; }
-
-    .book-card .author { color: #4a90d9; font-size: 0.85rem; margin-bottom: 4px; }
-
-    .book-card .year { color: #888; font-size: 0.8rem; margin-bottom: 14px; }
-
-    .book-card-buttons { display: flex; gap: 8px; }
-
-    .book-card-buttons button { padding: 6px 12px; font-size: 0.8rem; }
-
-    .add-book-btn {
-      margin-bottom: 24px;
-      padding: 10px 24px;
-      font-size: 1rem;
+    .post-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      display: block;
     }
 
-    #user-info { color: #4a90d9; font-size: 0.9rem; }
+    .post-card-body { padding: 14px; }
+    .post-card h3 { color: #ffffff; margin-bottom: 6px; font-size: 1rem; }
+    .post-card .description { color: #888; font-size: 0.85rem; margin-bottom: 6px; overflow: hidden; max-height: 60px; transition: max-height 0.3s ease; word-break: break-all; }
+    .post-card .owner { color: #4a90d9; font-size: 0.8rem; margin-bottom: 10px; }
+    .post-card-buttons { display: flex; gap: 8px; }
+    .post-card-buttons button { padding: 6px 12px; font-size: 0.8rem; }
 
-    .empty-msg { color: #555; text-align: center; padding: 40px; }
+    .add-post-btn { margin-bottom: 24px; padding: 10px 24px; font-size: 1rem; }
+    #user-info { color: #4a90d9; font-size: 0.9rem; }
+    .empty-msg { color: #555; text-align: center; padding: 40px; grid-column: 1/-1; }
+
+    /* Lightbox */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #000000ee;
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .lightbox.active { display: flex; }
+
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 80vh;
+      border-radius: 8px;
+      object-fit: contain;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 28px;
+      font-size: 2rem;
+      color: white;
+      cursor: pointer;
+    }
 
     @media (max-width: 600px) {
-  header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 16px;
-  }
-
-  header h1 {
-    font-size: 1.2rem;
-  }
-
-  #auth-buttons {
-    width: 100%;
-    justify-content: flex-end;
-  }
-
-  .container {
-    padding: 16px 12px;
-  }
-
-  .books-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .modal {
-    margin: 16px;
-    padding: 24px 16px;
-  }
-
-  .add-book-btn {
-    width: 100%;
-  }
-}
+      header { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px; }
+      header h1 { font-size: 1.2rem; }
+      #auth-buttons { width: 100%; justify-content: flex-end; }
+      .container { padding: 16px 12px; }
+      .posts-grid { grid-template-columns: 1fr; }
+      .modal { margin: 16px; padding: 24px 16px; }
+      .add-post-btn { width: 100%; }
+    }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>📚 Book Catalog</h1>
+  <h1>imagenes chistosas</h1>
   <div id="auth-buttons">
     <button onclick="openModal('login-modal')">Iniciar Sesión</button>
     <button class="secondary" onclick="openModal('register-modal')">Registrarse</button>
@@ -192,14 +211,19 @@
 </header>
 
 <div class="container">
-  <div id="add-book-section" style="display:none">
-    <button class="add-book-btn" onclick="openModal('book-modal')">+ Agregar Libro</button>
+  <div id="add-post-section" style="display:none">
+    <button class="add-post-btn" onclick="openModal('post-modal')">+ Subir imagen</button>
   </div>
+  <div class="section-title">Feed</div>
+  <div id="posts-grid" class="posts-grid">
+    <div class="empty-msg">Cargando...</div>
+  </div>
+</div>
 
-  <div class="section-title">Catálogo de Libros</div>
-  <div id="books-grid" class="books-grid">
-    <div class="empty-msg">Cargando libros...</div>
-  </div>
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <span class="lightbox-close">✕</span>
+  <img id="lightbox-img" src="" alt="">
 </div>
 
 <!-- Modal Login -->
@@ -231,39 +255,37 @@
   </div>
 </div>
 
-<!-- Modal Agregar/Editar Libro -->
-<div class="modal-overlay" id="book-modal">
+<!-- Modal Subir Post -->
+<div class="modal-overlay" id="post-modal">
   <div class="modal">
-    <h2 id="book-modal-title">Agregar Libro</h2>
-    <div id="book-error" class="error-msg"></div>
-    <input type="text" id="book-title" placeholder="Título">
-    <input type="text" id="book-author" placeholder="Autor">
-    <input type="number" id="book-year" placeholder="Año">
+    <h2 id="post-modal-title">Subir imagen</h2>
+    <div id="post-error" class="error-msg"></div>
+    <input type="text" id="post-title" placeholder="Título">
+    <textarea id="post-description" placeholder="Descripción (opcional)"></textarea>
+    <label class="file-input-label" id="file-label" for="post-image">
+      📁 Seleccionar imagen
+    </label>
+    <input type="file" id="post-image" accept="image/*" onchange="updateFileLabel(this)" style="display:none">
     <div class="modal-buttons">
-      <button onclick="saveBook()">Guardar</button>
-      <button class="secondary" onclick="closeModal('book-modal')">Cancelar</button>
+      <button onclick="savePost()">Publicar</button>
+      <button class="secondary" onclick="closeModal('post-modal')">Cancelar</button>
     </div>
   </div>
 </div>
 
 <script>
-  const API = "http://localhost:8000";
+  const API = window.location.origin;
   let token = localStorage.getItem("token");
   let currentUserId = parseInt(localStorage.getItem("user_id"));
-  let editingBookId = null;
 
   if (token) showLoggedIn();
-  loadBooks();
+  loadPosts();
 
-function openModal(id) {
+  function openModal(id) {
     document.getElementById(id).classList.add("active");
     if (id === "login-modal") {
       document.getElementById("login-username").value = "";
       document.getElementById("login-password").value = "";
-    }
-    if (id === "register-modal") {
-      document.getElementById("register-username").value = "";
-      document.getElementById("register-password").value = "";
     }
   }
 
@@ -272,23 +294,27 @@ function openModal(id) {
   }
 
   function showLoggedIn() {
-    const authButtons = document.getElementById("auth-buttons");
     const username = localStorage.getItem("username");
-    authButtons.innerHTML = `<span id="user-info">✓ ${username}</span><button class="secondary" onclick="logout()">Cerrar sesión</button>`;
-    document.getElementById("add-book-section").style.display = "block";
+    document.getElementById("auth-buttons").innerHTML = `
+      <span id="user-info">✓ ${username}</span>
+      <button class="secondary" onclick="logout()">Cerrar sesión</button>`;
+    document.getElementById("add-post-section").style.display = "block";
   }
 
   function logout() {
     localStorage.removeItem("token");
+    localStorage.removeItem("user_id");
+    localStorage.removeItem("username");
     token = null;
+    currentUserId = null;
     document.getElementById("auth-buttons").innerHTML = `
       <button onclick="openModal('login-modal')">Iniciar Sesión</button>
       <button class="secondary" onclick="openModal('register-modal')">Registrarse</button>`;
-    document.getElementById("add-book-section").style.display = "none";
-    loadBooks();
+    document.getElementById("add-post-section").style.display = "none";
+    loadPosts();
   }
 
-async function register() {
+  async function register() {
     const username = document.getElementById("register-username").value;
     const password = document.getElementById("register-password").value;
     document.getElementById("register-error").textContent = "";
@@ -336,83 +362,113 @@ async function register() {
       currentUserId = data.user_id;
       localStorage.setItem("token", token);
       localStorage.setItem("user_id", data.user_id);
-      localStorage.setItem("username", document.getElementById("login-username").value);
+      localStorage.setItem("username", username);
       closeModal("login-modal");
       showLoggedIn();
-      loadBooks();
+      loadPosts();
     } else {
       document.getElementById("login-error").textContent = "Usuario o contraseña incorrectos";
     }
   }
 
-  async function loadBooks() {
-    const res = await fetch(`${API}/books/`);
-    const books = await res.json();
-    const grid = document.getElementById("books-grid");
+  async function loadPosts() {
+    const res = await fetch(`${API}/posts/`);
+    const posts = await res.json();
+    const grid = document.getElementById("posts-grid");
 
-    if (books.length === 0) {
-      grid.innerHTML = `<div class="empty-msg">No hay libros todavía.</div>`;
+    if (posts.length === 0) {
+      grid.innerHTML = `<div class="empty-msg">No hay publicaciones todavía.</div>`;
       return;
     }
 
-    grid.innerHTML = books.map(book => `
-      <div class="book-card">
-        <h3>${book.title}</h3>
-        <div class="author">✍ ${book.author}</div>
-        <div class="year">📅 ${book.year}</div>
-        ${token && book.owner_id === currentUserId ? `
-        <div class="book-card-buttons">
-        <button onclick="editBook(${book.id}, '${book.title}', '${book.author}', ${book.year})">Editar</button>
-        <button class="danger" onclick="deleteBook(${book.id})">Eliminar</button>
-        </div>` : ""}
+    grid.innerHTML = posts.map(post => `
+      <div class="post-card">
+        <img src="${API}/${post.image_path}" alt="${post.title}" onclick="openLightbox('${API}/${post.image_path}')" style="cursor:pointer">
+        <div class="post-card-body">
+          <h3>${post.title}</h3>
+          ${post.description ? `
+          <div class="description" id="desc-${post.id}" style="overflow:hidden; max-height:60px">${post.description}</div>
+          ${post.description.length > 100 ? `<span style="color:#4a90d9; font-size:0.8rem; cursor:pointer" onclick="toggleDesc(${post.id})">Ver más</span>` : ""}
+        ` : ""}
+          ${token && post.owner_id === currentUserId ? `
+          <div class="post-card-buttons">
+            <button class="danger" onclick="deletePost(${post.id})">Eliminar</button>
+          </div>` : ""}
+        </div>
       </div>
     `).join("");
   }
 
-  function editBook(id, title, author, year) {
-    editingBookId = id;
-    document.getElementById("book-modal-title").textContent = "Editar Libro";
-    document.getElementById("book-title").value = title;
-    document.getElementById("book-author").value = author;
-    document.getElementById("book-year").value = year;
-    openModal("book-modal");
-  }
-
-  async function saveBook() {
-    const title = document.getElementById("book-title").value;
-    const author = document.getElementById("book-author").value;
-    const year = parseInt(document.getElementById("book-year").value);
-    document.getElementById("book-error").textContent = "";
-
-    const url = editingBookId ? `${API}/books/${editingBookId}` : `${API}/books/`;
-    const method = editingBookId ? "PUT" : "POST";
-
-    const res = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-      body: JSON.stringify({ title, author, year })
-    });
-
-    if (res.ok) {
-      closeModal("book-modal");
-      editingBookId = null;
-      document.getElementById("book-title").value = "";
-      document.getElementById("book-author").value = "";
-      document.getElementById("book-year").value = "";
-      loadBooks();
-    } else {
-      document.getElementById("book-error").textContent = "Error al guardar el libro.";
+  function updateFileLabel(input) {
+    const label = document.getElementById("file-label");
+    if (input.files && input.files[0]) {
+      label.textContent = `✓ ${input.files[0].name}`;
     }
   }
 
-  async function deleteBook(id) {
-    if (!confirm("¿Seguro que quieres eliminar este libro?")) return;
-    await fetch(`${API}/books/${id}`, {
+  async function savePost() {
+    const title = document.getElementById("post-title").value;
+    const description = document.getElementById("post-description").value;
+    const imageInput = document.getElementById("post-image");
+    const imageFile = imageInput ? imageInput.files[0] : null;
+    document.getElementById("post-error").textContent = "";
+
+    if (!title || !imageFile) {
+      document.getElementById("post-error").textContent = "El título y la imagen son obligatorios.";
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("title", title);
+    if (description) formData.append("description", description);
+    formData.append("image", imageFile);
+
+    const res = await fetch(`${API}/posts/`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${token}` },
+      body: formData
+    });
+
+    if (res.ok) {
+      closeModal("post-modal");
+      document.getElementById("post-title").value = "";
+      document.getElementById("post-description").value = "";
+      document.getElementById("post-image").value = "";
+      document.getElementById("file-label").textContent = "📁 Seleccionar imagen";
+      loadPosts();
+    } else {
+      document.getElementById("post-error").textContent = "Error al publicar.";
+    }
+  }
+
+  async function deletePost(id) {
+    if (!confirm("¿Seguro que quieres eliminar esta publicación?")) return;
+    await fetch(`${API}/posts/${id}`, {
       method: "DELETE",
       headers: { "Authorization": `Bearer ${token}` }
     });
-    loadBooks();
+    loadPosts();
   }
+
+  function openLightbox(src) {
+    document.getElementById("lightbox-img").src = src;
+    document.getElementById("lightbox").classList.add("active");
+  }
+
+  function closeLightbox() {
+    document.getElementById("lightbox").classList.remove("active");
+  }
+  function toggleDesc(id) {
+  const desc = document.getElementById(`desc-${id}`);
+  const btn = desc.nextElementSibling;
+  if (desc.style.maxHeight === "" || desc.style.maxHeight === "60px") {
+    desc.style.maxHeight = desc.scrollHeight + "px";
+    btn.textContent = "Ver menos";
+  } else {
+    desc.style.maxHeight = "60px";
+    btn.textContent = "Ver más";
+  }
+}
 </script>
 </body>
 </html>

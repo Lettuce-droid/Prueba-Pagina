@@ -3,11 +3,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from database import Base, engine
-from routers import books, users
+from routers import posts, users
+import os
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Book Catalog API")
+os.makedirs("uploads", exist_ok=True)
+
+app = FastAPI(title="imagenes chistosas")
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -17,8 +21,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 app.include_router(users.router)
-app.include_router(books.router)
+app.include_router(posts.router)
 
 @app.get("/health")
 def health_check():

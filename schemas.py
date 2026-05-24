@@ -12,21 +12,20 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class BookCreate(BaseModel):
+class PostCreate(BaseModel):
     title: str
-    author: str
-    year: int
+    description: Optional[str]=None
 
-class BookUpdate(BaseModel):
+class PostUpdate(BaseModel):
     title: Optional[str] = None
-    author: Optional[str] = None
-    year: Optional[int] = None
+    description: Optional[str]=None
 
-class BookResponse(BaseModel):
+
+class PostResponse(BaseModel):
     id: int
     title: str
-    author: str
-    year: int
+    description: Optional[str]=None
+    image_path: str
     owner_id: int
 
     class Config:
