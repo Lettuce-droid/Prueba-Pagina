@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Catalog</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background-color: #0f0f0f;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #4a90d9;
+    }
+
+    header h1 {
+      color: #4a90d9;
+      font-size: 1.6rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    #auth-buttons { display: flex; gap: 10px; }
+
+    button {
+      background: #4a90d9;
+      color: white;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+
+    button:hover { background: #357abd; }
+
+    button.secondary {
+      background: transparent;
+      border: 1px solid #4a90d9;
+      color: #4a90d9;
+    }
+
+    button.secondary:hover { background: #4a90d920; }
+
+    button.danger { background: #c0392b; }
+    button.danger:hover { background: #a93226; }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 32px 16px; }
+
+    .section-title {
+      font-size: 1.2rem;
+      color: #4a90d9;
+      margin-bottom: 20px;
+      border-left: 4px solid #4a90d9;
+      padding-left: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #000000aa;
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: #1a1a2e;
+      border: 1px solid #4a90d9;
+      border-radius: 10px;
+      padding: 32px;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .modal h2 { color: #4a90d9; margin-bottom: 20px; }
+
+    .modal input {
+      width: 100%;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      background: #0f0f0f;
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 0.95rem;
+    }
+
+    .modal input:focus { outline: none; border-color: #4a90d9; }
+
+    .modal-buttons { display: flex; gap: 10px; margin-top: 8px; }
+
+    .error-msg { color: #e74c3c; font-size: 0.85rem; margin-bottom: 10px; }
+    .success-msg { color: #2ecc71; font-size: 0.85rem; margin-bottom: 10px; }
+
+    .books-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .book-card {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 10px;
+      padding: 20px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .book-card:hover { border-color: #4a90d9; transform: translateY(-3px); }
+
+    .book-card h3 { color: #ffffff; margin-bottom: 6px; font-size: 1rem; }
+
+    .book-card .author { color: #4a90d9; font-size: 0.85rem; margin-bottom: 4px; }
+
+    .book-card .year { color: #888; font-size: 0.8rem; margin-bottom: 14px; }
+
+    .book-card-buttons { display: flex; gap: 8px; }
+
+    .book-card-buttons button { padding: 6px 12px; font-size: 0.8rem; }
+
+    .add-book-btn {
+      margin-bottom: 24px;
+      padding: 10px 24px;
+      font-size: 1rem;
+    }
+
+    #user-info { color: #4a90d9; font-size: 0.9rem; }
+
+    .empty-msg { color: #555; text-align: center; padding: 40px; }
+
+    @media (max-width: 600px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  header h1 {
+    font-size: 1.2rem;
+  }
+
+  #auth-buttons {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .container {
+    padding: 16px 12px;
+  }
+
+  .books-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal {
+    margin: 16px;
+    padding: 24px 16px;
+  }
+
+  .add-book-btn {
+    width: 100%;
+  }
+}
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>📚 Book Catalog</h1>
+  <div id="auth-buttons">
+    <button onclick="openModal('login-modal')">Iniciar Sesión</button>
+    <button class="secondary" onclick="openModal('register-modal')">Registrarse</button>
+  </div>
+</header>
+
+<div class="container">
+  <div id="add-book-section" style="display:none">
+    <button class="add-book-btn" onclick="openModal('book-modal')">+ Agregar Libro</button>
+  </div>
+
+  <div class="section-title">Catálogo de Libros</div>
+  <div id="books-grid" class="books-grid">
+    <div class="empty-msg">Cargando libros...</div>
+  </div>
+</div>
+
+<!-- Modal Login -->
+<div class="modal-overlay" id="login-modal">
+  <div class="modal">
+    <h2>Iniciar Sesión</h2>
+    <div id="login-error" class="error-msg"></div>
+    <input type="text" id="login-username" placeholder="Usuario" autocomplete="off">
+    <input type="password" id="login-password" placeholder="Contraseña" autocomplete="new-password">
+    <div class="modal-buttons">
+      <button onclick="login()">Entrar</button>
+      <button class="secondary" onclick="closeModal('login-modal')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Registro -->
+<div class="modal-overlay" id="register-modal">
+  <div class="modal">
+    <h2>Registrarse</h2>
+    <div id="register-error" class="error-msg"></div>
+    <div id="register-success" class="success-msg"></div>
+    <input type="text" id="register-username" placeholder="Usuario">
+    <input type="password" id="register-password" placeholder="Contraseña">
+    <div class="modal-buttons">
+      <button onclick="register()">Crear cuenta</button>
+      <button class="secondary" onclick="closeModal('register-modal')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Agregar/Editar Libro -->
+<div class="modal-overlay" id="book-modal">
+  <div class="modal">
+    <h2 id="book-modal-title">Agregar Libro</h2>
+    <div id="book-error" class="error-msg"></div>
+    <input type="text" id="book-title" placeholder="Título">
+    <input type="text" id="book-author" placeholder="Autor">
+    <input type="number" id="book-year" placeholder="Año">
+    <div class="modal-buttons">
+      <button onclick="saveBook()">Guardar</button>
+      <button class="secondary" onclick="closeModal('book-modal')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = "http://192.168.1.7:8000";
+  let token = localStorage.getItem("token");
+  let currentUserId = parseInt(localStorage.getItem("user_id"));
+  let editingBookId = null;
+
+  if (token) showLoggedIn();
+  loadBooks();
+
+function openModal(id) {
+    document.getElementById(id).classList.add("active");
+    if (id === "login-modal") {
+      document.getElementById("login-username").value = "";
+      document.getElementById("login-password").value = "";
+    }
+    if (id === "register-modal") {
+      document.getElementById("register-username").value = "";
+      document.getElementById("register-password").value = "";
+    }
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove("active");
+  }
+
+  function showLoggedIn() {
+    const authButtons = document.getElementById("auth-buttons");
+    const username = localStorage.getItem("username");
+    authButtons.innerHTML = `<span id="user-info">✓ ${username}</span><button class="secondary" onclick="logout()">Cerrar sesión</button>`;
+    document.getElementById("add-book-section").style.display = "block";
+  }
+
+  function logout() {
+    localStorage.removeItem("token");
+    token = null;
+    document.getElementById("auth-buttons").innerHTML = `
+      <button onclick="openModal('login-modal')">Iniciar Sesión</button>
+      <button class="secondary" onclick="openModal('register-modal')">Registrarse</button>`;
+    document.getElementById("add-book-section").style.display = "none";
+    loadBooks();
+  }
+
+async function register() {
+    const username = document.getElementById("register-username").value;
+    const password = document.getElementById("register-password").value;
+    document.getElementById("register-error").textContent = "";
+    document.getElementById("register-success").textContent = "";
+
+    if (!username || !password) {
+      document.getElementById("register-error").textContent = "Por favor completa todos los campos.";
+      return;
+    }
+
+    const res = await fetch(`${API}/users/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+
+    if (res.ok) {
+      document.getElementById("register-success").textContent = "¡Cuenta creada exitosamente!";
+      document.getElementById("register-username").value = "";
+      document.getElementById("register-password").value = "";
+      setTimeout(() => {
+        closeModal("register-modal");
+        document.getElementById("register-success").textContent = "";
+      }, 1500);
+    } else {
+      const data = await res.json();
+      document.getElementById("register-error").textContent = data.detail;
+    }
+  }
+
+  async function login() {
+    const username = document.getElementById("login-username").value;
+    const password = document.getElementById("login-password").value;
+    document.getElementById("login-error").textContent = "";
+
+    const form = new FormData();
+    form.append("username", username);
+    form.append("password", password);
+
+    const res = await fetch(`${API}/users/login`, { method: "POST", body: form });
+
+    if (res.ok) {
+      const data = await res.json();
+      token = data.access_token;
+      currentUserId = data.user_id;
+      localStorage.setItem("token", token);
+      localStorage.setItem("user_id", data.user_id);
+      localStorage.setItem("username", document.getElementById("login-username").value);
+      closeModal("login-modal");
+      showLoggedIn();
+      loadBooks();
+    } else {
+      document.getElementById("login-error").textContent = "Usuario o contraseña incorrectos";
+    }
+  }
+
+  async function loadBooks() {
+    const res = await fetch(`${API}/books/`);
+    const books = await res.json();
+    const grid = document.getElementById("books-grid");
+
+    if (books.length === 0) {
+      grid.innerHTML = `<div class="empty-msg">No hay libros todavía.</div>`;
+      return;
+    }
+
+    grid.innerHTML = books.map(book => `
+      <div class="book-card">
+        <h3>${book.title}</h3>
+        <div class="author">✍ ${book.author}</div>
+        <div class="year">📅 ${book.year}</div>
+        ${token && book.owner_id === currentUserId ? `
+        <div class="book-card-buttons">
+        <button onclick="editBook(${book.id}, '${book.title}', '${book.author}', ${book.year})">Editar</button>
+        <button class="danger" onclick="deleteBook(${book.id})">Eliminar</button>
+        </div>` : ""}
+      </div>
+    `).join("");
+  }
+
+  function editBook(id, title, author, year) {
+    editingBookId = id;
+    document.getElementById("book-modal-title").textContent = "Editar Libro";
+    document.getElementById("book-title").value = title;
+    document.getElementById("book-author").value = author;
+    document.getElementById("book-year").value = year;
+    openModal("book-modal");
+  }
+
+  async function saveBook() {
+    const title = document.getElementById("book-title").value;
+    const author = document.getElementById("book-author").value;
+    const year = parseInt(document.getElementById("book-year").value);
+    document.getElementById("book-error").textContent = "";
+
+    const url = editingBookId ? `${API}/books/${editingBookId}` : `${API}/books/`;
+    const method = editingBookId ? "PUT" : "POST";
+
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      body: JSON.stringify({ title, author, year })
+    });
+
+    if (res.ok) {
+      closeModal("book-modal");
+      editingBookId = null;
+      document.getElementById("book-title").value = "";
+      document.getElementById("book-author").value = "";
+      document.getElementById("book-year").value = "";
+      loadBooks();
+    } else {
+      document.getElementById("book-error").textContent = "Error al guardar el libro.";
+    }
+  }
+
+  async function deleteBook(id) {
+    if (!confirm("¿Seguro que quieres eliminar este libro?")) return;
+    await fetch(`${API}/books/${id}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    loadBooks();
+  }
+</script>
+</body>
+</html>
