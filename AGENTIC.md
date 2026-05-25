@@ -101,6 +101,24 @@ the fix, which I understood and applied.
 - The initial bcrypt version had a bug with password length validation that threw
   a 500 error even for short passwords — we fixed it by downgrading to bcrypt==4.0.1
 
+### Security improvements I implemented after initial generation
+
+**Environment variables:**
+After the initial project was working, I asked Claude to move the SECRET_KEY
+out of the source code and into a .env file using python-dotenv. I understood
+why this matters — if the key is hardcoded and pushed to GitHub, anyone can
+read it and forge JWT tokens to impersonate any user.
+
+**File validation:**
+I asked Claude to add validation so only image files under 5MB can be uploaded.
+I tested this myself by temporarily lowering the limit to 10KB and verifying
+that the API correctly rejected larger files with a 400 error.
+
+**Logging:**
+I added logging to record when users attempt to upload invalid files, and when
+posts are created successfully. This creates an app.log file that helps detect
+suspicious behavior without exposing sensitive information.
+
 ## 5. What I Learned
 
 - **How a backend API works:** Before this project I did not know what an API was

@@ -21,12 +21,16 @@ A REST API and web application for sharing images, built with FastAPI, SQLAlchem
    cd Prueba-Pagina
 
 2. Install dependencies:
-   pip install fastapi uvicorn sqlalchemy pytest httpx python-jose[cryptography] passlib[bcrypt]==4.0.1 python-multipart
+   pip install fastapi uvicorn sqlalchemy pytest httpx python-jose[cryptography] passlib[bcrypt]==4.0.1 python-multipart python-dotenv
 
-3. Run the application:
+3. Create a `.env` file in the root folder:
+SECRET_KEY=your-secret-key-here
+DATABASE_URL=sqlite:///./books.db
+
+4. Run the application:
    python -m uvicorn main:app --reload
 
-4. Open your browser at:
+5. Open your browser at:
    http://localhost:8000
 
 ## Running the tests
