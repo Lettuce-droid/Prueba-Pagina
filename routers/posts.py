@@ -7,6 +7,9 @@ import auth
 import shutil
 import os
 from database import get_db
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -25,9 +28,27 @@ def create_post(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_user)
 ):
+    ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"]
+    MAX_SIZE = 5 * 1024 * 1024  # 5MB
+
+    if image.content_type not in ALLOWED_TYPES:
+        logger.warning(f"Invalid file type attempt: {image.content_type} by user {current_user.id}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Solo se permiten imágenes (jpg, png, gif, webp)"
+        )
+
+    contents = image.file.read()
+    if len(contents) > MAX_SIZE:
+        logger.warning(f"File too large: {len(contents)} bytes by user {current_user.id}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La imagen no puede pesar más de 5MB"
+        )
+
     file_path = f"{UPLOAD_DIR}/{current_user.id}_{image.filename}".replace("\\", "/")
     with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(image.file, buffer)
+        buffer.write(contents)
 
     new_post = models.Post(
         title=title,
@@ -38,6 +59,7 @@ def create_post(
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
+    logger.info(f"Post created: {new_post.id} by user {current_user.id}")
     return new_post
 
 @router.put("/{post_id}", response_model=schemas.PostResponse)

@@ -5,6 +5,7 @@ from fastapi.responses import FileResponse
 from database import Base, engine
 from routers import posts, users
 import os
+import logging
 
 Base.metadata.create_all(bind=engine)
 
@@ -33,3 +34,15 @@ def health_check():
 @app.get("/")
 def serve_frontend():
     return FileResponse("index.html")
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler("app.log"),
+        logging.StreamHandler()
+    ]
+)
+
+logger = logging.getLogger(__name__)

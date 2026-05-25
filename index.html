@@ -437,7 +437,8 @@
       document.getElementById("file-label").textContent = "📁 Seleccionar imagen";
       loadPosts();
     } else {
-      document.getElementById("post-error").textContent = "Error al publicar.";
+      const data = await res.json();
+      document.getElementById("post-error").textContent = data.detail || "Error al publicar.";
     }
   }
 
